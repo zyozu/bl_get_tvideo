@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<title>Twitter動画・GIF保存ブックマークレット</title>
+<style>
+	.hide {
+		display:none;
+	}
+</style>
+	</head>
+	<body><div class="container">
+		
+		<div id="loading" class="hide mt-5">
+			<div class="spinner-border" role="status">
+				<span class="sr-only">Loading...</span>
+			</div>
+			読み込み中です...
+		</div>
+		<div id="main" class="hide">
+			<h3 class="mt-2">Twitter動画・GIF保存ブックマークレット</h3>
+			<ol>
+			<li>
+				最初に以下のブックマークレットをコピーしてブラウザに登録しておきます。
+				<form class="m-3">
+				  <div class="mb-3">
+					<label for="copyTarget" class="form-label">ブックマークレット</label>
+					<input type="text" class="form-control" id="copyTarget" readonly>
+				  </div>
+				  <button type="button" onclick="copyToClipboard()" class="btn btn-primary">コピー</button>
+				  <span id="copy-message" class="mt-2 alert alert-primary hide"><span style="display:inline-block;width:50%;">コピーしました</span></span>
+				</form>
+				
+				<ul class="mb-2">
+				<li>
+				<a target="_blank" href="https://wayohoo.com/article/5444">iPhoneのSafariにブックマークレットを登録する方法</a>
+				</li>
+				<li>
+				<a target="_blank" href="https://rezv.net/iphone/9352/">AndroidのChromeにブックマークレットを登録する方法</a>
+				</li>
+				<li>
+				<a target="_blank" href="https://qiita.com/aqril_1132/items/b5f9040ccb8cbc705d04">PCでブックマークレットの登録する方法</a>
+				</li>
+				</ul>
+			</li>
+			<li class="mb-2">
+				ブラウザでTwitterを表示し、登録したブックマークレットを起動します。
+			</li>
+			<li class="mb-2">
+				そのまま保存したい動画・GIFがあるツイート詳細画面を表示すると、画面下にmp4のダウンロードリンクが表示されます。（GIFの場合はmp4をgifに変換するボタンも表示されます。）
+			</li>
+			</ol>
+
+			
+		</div>
+		
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+
+		<script>
+		
+		var apiCall = function(_url, _successCallback ,_errorCallback, _method, _params, _beforeSendCallback, _completeCallback, _type){
+			var type = "json";
+			if(_type){
+				type = _type;
+			}
+			var errorCallback = _errorCallback;
+			if(! errorCallback){
+				errorCallback = defaultErrorCallback;
+			}
+			var method = "GET";
+			if(_method){
+				method = _method;
+			}
+			var params = _params;
+			if(!params){
+				params = "";
+			}
+			
+			$.ajax({
+				url: _url,
+				type: method,
+				data: params,
+				timeout: 60000*10,
+				dataType: type,
+				processData: false,
+				contentType: false,
+				cache: false,
+				beforeSend: function(xhr, settings) {
+					if(_beforeSendCallback){
+						_beforeSendCallback();
+					}
+				},
+				complete: function(xhr, textStatus) {
+					if(_completeCallback){
+						_completeCallback();
+					}
+				},
+				success: function(result, textStatus, xhr) {
+					if(result){
+						if(_successCallback){
+							_successCallback(200, result);
+						}
+					}else{
+						console.log('Error 2 : 通信に失敗しました');
+						errorCallback();
+					}
+		        },
+				error: function(xhr, textStatus, error) {
+					console.log('Error 1 : 通信に失敗しました');
+					console.log("code : " + xhr.status);
+					console.log("status : " + textStatus);
+					console.log("message : " + error.message);
+					errorCallback();
+				}
+			});
+		}
+		var defaultErrorCallback = function(code, result, $form){
+			alert('Error : 通信に失敗しました');
+		}
+		var loadStart = function(){
+			$('#loading').show();
+			$('#submit').prop("disabled", true);
+		}
+		var loadEnd = function(){
+			$('#loading').hide();
+			$('#submit').prop("disabled", false);
+		}
+		var copyToClipboard = function() {
+			var copyTarget = document.getElementById("copyTarget");
+			copyTarget.select();
+			document.execCommand("Copy");
+			$('#copy-message').stop().hide().fadeIn('fast').delay(2000).fadeOut('2000');
+		}
+		$(document).ready(function(){
+			loadStart();
+			var url = "get_tvideo.js";
+			apiCall(url,function(code, data){
+				var js = data;
+				js = js.replace(/^\t{1,}/gm, '');
+				js = js.replace(/ {2,}|\n|\r/g, '');
+				js = js.replace(/\s/g, '%20');
+				$('#copyTarget').val(js);
+				$("#main").show();
+				$('#copyTarget').focus(function(){
+					$(this).select();
+				});
+				loadEnd();
+			}, function(code, result){
+				defaultErrorCallback(code, result, $form);
+				loadEnd();
+			},"GET",null,null,null,"text");
+			
+		});
+		
+		</script>
+	</div></body>
+</html>

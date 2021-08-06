@@ -163,71 +163,63 @@ GIFEncoder=function(){for(var V=0,w={};V<256;V++){w[V]=String.fromCharCode(V)}fu
 		if(pm) pm.cancel();
 		if(src) pm=_g(src,pr,li,n);
 	};
-	c=function(r,j,l,i,v2,t,b,k,k2,x,n,bu,li,pr){
-		p=/^https:\/\/(mobile\.)?twitter\.com\/i\/api\/graphql\/.+\/TweetDetail\?.+$/g;
+	c=function(r,j,l,i,v,t,b,k,k2,x,n,bu,li,pr){
+		p=/^https:\/\/(mobile\.)?twitter\.com\/i\/api\/2\/timeline\/conversation\/\d+\.json\?.+$/g;
 		if(p.test(r.responseURL)){
 			j=JSON.parse(r.response);
-			j.data.threaded_conversation_with_injections.instructions.forEach(function(v){
-				if(v.type=="TimelineAddEntries"){
-					l=v.entries.reverse();
-					for(i=0;i<l.length;i++){
-						v2=l[i];
-						if(v2.entryId.indexOf("tweet-")===0){
-							t = v2.content.itemContent.tweet_results.result.legacy;
-							if(t.extended_entities){
-								t.extended_entities.media.forEach(function(v3){
-									if(v3.type=="video"||v3.type=="animated_gif"){
-										v3.video_info.variants.forEach(function(v4){
-											if(!b||b.bitrate<v4.bitrate){
-												b = v4;
-											}
-										});
-										k="<div style=\"width:100vw;text-overflow:ellipsis;white-space:nowrap;\">";
-										k2="<div style=\"width:100vw;text-overflow:ellipsis;white-space:nowrap;margin-bottom:1em;\">";
-										n=b.url.match(".+/(.+?)([\?#;].*)?$")[1];
-										a2.innerHTML=k+t.full_text+"</div>"+k2+"mp4:<a download=\""+n+"\" target=\"_blank\" href=\""+b.url+"\">"+b.url+"</a></div>";
-										if(v3.type=="animated_gif"){
-											if(x){xhr.abort();x=null;}
-											g();
-											x=new XMLHttpRequest();
-											x.open('GET', b.url, true);
-											x.responseType='arraybuffer';
-											x.onload=function(e) {
-												bu=w.URL.createObjectURL(new Blob([this.response],{type:"video/mp4"}));
-												pr=d.createElement('span');
-												li=d.createElement('a');
-												o=li.style;
-												o.display="inlone-block";
-												o.padding="0.8em";
-												o.backgroundColor="#1da1f2";
-												o.borderRadius="1.3em";
-												o.color="#fff";
-												o.textDecoration="none";
-												li.innerHTML="gif変換";
-												li.href="#";
-												pr.innerHTML="";
-												var sb=0;
-												li.onclick=function(){
-													if(sb) return false;
-													li.innerHTML="gif変換中...";
-													sb=1;
-													g(bu,pr,li,n);
-													return false;
-												};
-												a2.appendChild(li);
-												a2.appendChild(pr);
-												
-											};
-											x.send();
-										}
-									}
-								});
+			v=j.globalObjects.tweets;
+			i=r.responseURL.match(/conversation\/(\d+)\.json/);
+			i=i[1];
+			t = v[i];
+			if(t.extended_entities){
+				t.extended_entities.media.forEach(function(v3){
+					if(v3.type=="video"||v3.type=="animated_gif"){
+						v3.video_info.variants.forEach(function(v4){
+							if(!b||b.bitrate<v4.bitrate){
+								b = v4;
 							}
-							break;
+						});
+						k="<div style=\"width:100vw;text-overflow:ellipsis;white-space:nowrap;\">";
+						k2="<div style=\"width:100vw;text-overflow:ellipsis;white-space:nowrap;margin-bottom:1em;\">";
+						n=b.url.match(".+/(.+?)([\?#;].*)?$")[1];
+						a2.innerHTML=k+t.full_text+"</div>"+k2+"mp4:<a download=\""+n+"\" target=\"_blank\" href=\""+b.url+"\">"+b.url+"</a></div>";
+						if(v3.type=="animated_gif"){
+							if(x){xhr.abort();x=null;}
+							g();
+							x=new XMLHttpRequest();
+							x.open('GET', b.url, true);
+							x.responseType='arraybuffer';
+							x.onload=function(e) {
+								bu=w.URL.createObjectURL(new Blob([this.response],{type:"video/mp4"}));
+								pr=d.createElement('span');
+								li=d.createElement('a');
+								o=li.style;
+								o.display="inlone-block";
+								o.padding="0.8em";
+								o.backgroundColor="#1da1f2";
+								o.borderRadius="1.3em";
+								o.color="#fff";
+								o.textDecoration="none";
+								li.innerHTML="gif変換";
+								li.href="#";
+								pr.innerHTML="";
+								var sb=0;
+								li.onclick=function(){
+									if(sb) return false;
+									li.innerHTML="gif変換中...";
+									sb=1;
+									g(bu,pr,li,n);
+									return false;
+								};
+								a2.appendChild(li);
+								a2.appendChild(pr);
+								
+							};
+							x.send();
 						}
 					}
-				}
-			});
+				});
+			}
 		}
 	};
 	h(c);

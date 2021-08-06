@@ -224,5 +224,5 @@ GIFEncoder=function(){for(var V=0,w={};V<256;V++){w[V]=String.fromCharCode(V)}fu
 	};
 	h(c);
 	
-})(document,location.href,window)
+})(document,location.href,window,2)
 

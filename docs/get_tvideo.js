@@ -1,4 +1,4 @@
-javascript:(function(d,u,w,p,s,h,c,n,a,a2,a3,a3f,o,g,_g,com,pm){
+javascript:(function(d,u,w,p,s,h,c,n,a,a2,a3,a3f,ce,x,o,g,_g,com,pm){
 	p=/^https:\/\/(mobile\.)?twitter\.com\/.+$/g;
 	if(!p.test(u)){
 		alert("Twitterを表示してから実行してください");
@@ -82,7 +82,7 @@ GIFEncoder=function(){for(var V=0,w={};V<256;V++){w[V]=String.fromCharCode(V)}fu
 		}
 		return 1;
 	};
-	_g=function(src,pr,li,n,fps=25,ff,vi,se,du,ca,ct,ca2,ct2,it,cu,en,r,sw,sh,de,cde,sid,sid2) {
+	_g=function(src,pr,li,n,fps=60,ff,vi,se,du,ca,ct,ca2,ct2,it,cu,en,r,sw,sh,de,cde,sid,sid2) {
 		ff=false;
 		vi=d.createElement("video");
 		vi.addEventListener('seeked', async function() {
@@ -163,59 +163,85 @@ GIFEncoder=function(){for(var V=0,w={};V<256;V++){w[V]=String.fromCharCode(V)}fu
 		if(pm) pm.cancel();
 		if(src) pm=_g(src,pr,li,n);
 	};
-	c=function(r,j,l,i,v,t,b,k,k2,x,n,bu,li,pr){
+	ce=function(v3,ft,b,k,k2,n,bu,li,pr){
+		if(v3.type=="video"||v3.type=="animated_gif"){
+			v3.video_info.variants.forEach(function(v4){
+				if((v4.content_type=="video/mp4")&&(!b||b.bitrate<v4.bitrate)){
+					b = v4;
+				}
+			});
+			k="<div style=\"width:100vw;text-overflow:ellipsis;white-space:nowrap;\">";
+			k2="<div style=\"width:100vw;text-overflow:ellipsis;white-space:nowrap;margin-bottom:1em;\">";
+			n=b.url.match(".+/(.+?)([\?#;].*)?$")[1];
+			a2.innerHTML=k+ft+"</div>"+k2+"mp4:<a download=\""+n+"\" target=\"_blank\" href=\""+b.url+"\">"+b.url+"</a></div>";
+			if(v3.type=="animated_gif"){
+				if(x){x.abort();x=0;}
+				g();
+				x=new XMLHttpRequest();
+				x.open('GET', b.url, true);
+				x.responseType='arraybuffer';
+				x.onload=function(e) {
+					bu=w.URL.createObjectURL(new Blob([this.response],{type:"video/mp4"}));
+					pr=d.createElement('span');
+					li=d.createElement('a');
+					o=li.style;
+					o.display="inlone-block";
+					o.padding="0.8em";
+					o.backgroundColor="#1da1f2";
+					o.borderRadius="1.3em";
+					o.color="#fff";
+					o.textDecoration="none";
+					li.innerHTML="gif変換";
+					li.href="#";
+					pr.innerHTML="";
+					var sb=0;
+					li.onclick=function(){
+						if(sb) return false;
+						li.innerHTML="gif変換中...";
+						sb=1;
+						g(bu,pr,li,n);
+						return false;
+					};
+					a2.appendChild(li);
+					a2.appendChild(pr);
+					x=0;
+				};
+				x.send();
+			}
+		}
+	};
+	c=function(r,j,l,i,v,v2,t){
 		p=/^https:\/\/(mobile\.)?twitter\.com\/i\/api\/2\/timeline\/conversation\/\d+\.json\?.+$/g;
 		if(p.test(r.responseURL)){
 			j=JSON.parse(r.response);
+			console.log(j);
 			v=j.globalObjects.tweets;
 			i=r.responseURL.match(/conversation\/(\d+)\.json/);
 			i=i[1];
 			t = v[i];
 			if(t.extended_entities){
 				t.extended_entities.media.forEach(function(v3){
-					if(v3.type=="video"||v3.type=="animated_gif"){
-						v3.video_info.variants.forEach(function(v4){
-							if(!b||b.bitrate<v4.bitrate){
-								b = v4;
+					ce(v3,t.full_text);
+				});
+			}
+		}else{
+			p=/^https:\/\/(mobile\.)?twitter\.com\/i\/api\/graphql\/.+\/TweetDetail\?.+$/g;
+			if(p.test(r.responseURL)){
+				j=JSON.parse(r.response);
+				j.data.threaded_conversation_with_injections.instructions.forEach(function(v){
+					if(v.type=="TimelineAddEntries"){
+						l=v.entries.reverse();
+						for(i=0;i<l.length;i++){
+							v2=l[i];
+							if(v2.entryId.indexOf("tweet-")===0){
+								t = v2.content.itemContent.tweet_results.result.legacy;
+								if(t.extended_entities){
+									t.extended_entities.media.forEach(function(v3){
+										ce(v3,t.full_text);
+									});
+								}
+								break;
 							}
-						});
-						k="<div style=\"width:100vw;text-overflow:ellipsis;white-space:nowrap;\">";
-						k2="<div style=\"width:100vw;text-overflow:ellipsis;white-space:nowrap;margin-bottom:1em;\">";
-						n=b.url.match(".+/(.+?)([\?#;].*)?$")[1];
-						a2.innerHTML=k+t.full_text+"</div>"+k2+"mp4:<a download=\""+n+"\" target=\"_blank\" href=\""+b.url+"\">"+b.url+"</a></div>";
-						if(v3.type=="animated_gif"){
-							if(x){xhr.abort();x=null;}
-							g();
-							x=new XMLHttpRequest();
-							x.open('GET', b.url, true);
-							x.responseType='arraybuffer';
-							x.onload=function(e) {
-								bu=w.URL.createObjectURL(new Blob([this.response],{type:"video/mp4"}));
-								pr=d.createElement('span');
-								li=d.createElement('a');
-								o=li.style;
-								o.display="inlone-block";
-								o.padding="0.8em";
-								o.backgroundColor="#1da1f2";
-								o.borderRadius="1.3em";
-								o.color="#fff";
-								o.textDecoration="none";
-								li.innerHTML="gif変換";
-								li.href="#";
-								pr.innerHTML="";
-								var sb=0;
-								li.onclick=function(){
-									if(sb) return false;
-									li.innerHTML="gif変換中...";
-									sb=1;
-									g(bu,pr,li,n);
-									return false;
-								};
-								a2.appendChild(li);
-								a2.appendChild(pr);
-								
-							};
-							x.send();
 						}
 					}
 				});

@@ -214,7 +214,6 @@ GIFEncoder=function(){for(var V=0,w={};V<256;V++){w[V]=String.fromCharCode(V)}fu
 		p=/^https:\/\/(mobile\.)?twitter\.com\/i\/api\/2\/timeline\/conversation\/\d+\.json\?.+$/g;
 		if(p.test(r.responseURL)){
 			j=JSON.parse(r.response);
-			console.log(j);
 			v=j.globalObjects.tweets;
 			i=r.responseURL.match(/conversation\/(\d+)\.json/);
 			i=i[1];

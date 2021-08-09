@@ -82,7 +82,7 @@ GIFEncoder=function(){for(var V=0,w={};V<256;V++){w[V]=String.fromCharCode(V)}fu
 		}
 		return 1;
 	};
-	_g=function(src,pr,li,n,fps=25,ff,vi,se,du,ca,ct,ca2,ct2,it,cu,en,r,sw,sh,de,cde,sid,sid2) {
+	_g=function(src,pr,li,n,fps=60,ff,vi,se,du,ca,ct,ca2,ct2,it,cu,en,r,sw,sh,de,cde,sid,sid2) {
 		ff=false;
 		vi=d.createElement("video");
 		vi.addEventListener('seeked', async function() {
